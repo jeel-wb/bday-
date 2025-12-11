@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Riya!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        /* --- CSS STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            overflow: hidden; 
+            background-color: #000;
+        }
+
+        /* --- UTILS --- */
+        .hidden { display: none !important; }
+        .screen {
+            width: 100%;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.5s;
+            z-index: 1;
+        }
+
+        /* Music Toggle Button */
+        .music-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* --- SCREEN 1: CHAT INTERFACE --- */
+        #chat-screen {
+            background-color: #121212;
+            justify-content: flex-end;
+            padding-bottom: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 80%;
+            font-size: 1rem;
+            opacity: 0; 
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .received { background-color: #333; color: #fff; align-self: flex-start; border-bottom-left-radius: 5px; }
+        .sent { background-color: #0084ff; color: #fff; align-self: flex-end; border-bottom-right-radius: 5px; }
+
+        .link-msg {
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        /* --- GENERAL BIRTHDAY THEME --- */
+        .pink-theme {
+            background-color: #e0f7fa;
+            color: #333;
+            overflow-y: auto; 
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Fredoka One', cursive; color: #00bcd4; }
+        
+        .btn {
+            background: #00bcd4;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+            z-index: 100;
+            position: relative;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* --- SURPRISE 1: WELCOME --- */
+        #welcome-screen { justify-content: center; }
+        .hero-img {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            overflow: hidden; 
+            border: 8px solid #fff;
+            animation: float 3s ease-in-out infinite;
+        }
+        .hero-img img { width: 100%; height: 100%; object-fit: cover; }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* --- SURPRISE 2: ENVELOPE --- */
+        #letter-screen { justify-content: center; }
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 20px;
+            margin-top: 50px; 
+        }
+        .envelope {
+            width: 300px;
+            height: 200px;
+            background: #26c6da; 
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .envelope::before { /* Flap */
+            content: ''; position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-left: 150px solid transparent; border-right: 150px solid transparent;
+            border-top: 100px solid #4dd0e1;
+            transform-origin: top; transition: transform 0.6s; z-index: 5; 
+        }
+        .envelope::after { /* Pocket */
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 0;
+            border-left: 150px solid #80deea; border-right: 150px solid #80deea; 
+            border-top: 100px solid transparent; z-index: 3;
+            border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;
+        }
+        .letter {
+            position: absolute; width: 260px; height: 180px; background: white;
+            left: 20px; bottom: 0px; padding: 15px; text-align: center; font-size: 0.9rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.6s ease-in-out, z-index 0.2s 0.6s; z-index: 1; 
+            display: flex; flex-direction: column; justify-content: center; border-radius: 5px;
+        }
+        .envelope.open::before { transform: rotateX(180deg); z-index: 0; }
+        .envelope.open .letter { transform: translateY(-150px); z-index: 4; transition-delay: 0.5s; }
+
+        /* --- SURPRISE 3: CAKE --- */
+        #cake-screen { justify-content: center; }
+        .cake-stage {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin: 10px auto;
+        }
+        .cake-img {
+            position: absolute; left: 50px; bottom: 50px; width: 200px; height: 200px;
+            background-image: url('https://cdn-icons-png.flaticon.com/512/4525/4525686.png');
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            z-index: 2;
+        }
+        .plate-img {
+            position: absolute; right: 0px; bottom: 30px; width: 120px; height: 80px;
+            background-image: url('https://cdn-icons-png.flaticon.com/512/1971/1971058.png'); 
+            background-size: contain; background-repeat: no-repeat; opacity: 0.8; z-index: 1;
+        }
+        .slice-img {
+            position: absolute; left: 100px; bottom: 120px; width: 80px; height: 80px;
+            background-image: url('https://cdn-icons-png.flaticon.com/512/2682/2682455.png');
+            background-size: contain; background-repeat: no-repeat; z-index: 3;
+            opacity: 0; transition: all 1.5s ease-in-out;
+        }
+        .slice-img.served { opacity: 1; transform: translate(100px, 50px) rotate(10deg); }
+        .cut-slider { position: absolute; bottom: 10px; left: 10%; width: 80%; z-index: 10; cursor: pointer; }
+        .cut-line {
+            position: absolute; left: 90px; bottom: 100px; height: 100px; width: 4px;
+            background: white; transform: scaleY(0); transform-origin: top;
+            transition: transform 0.2s; z-index: 5; box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        /* --- SURPRISE 4: 9 CARDS --- */
+        #card-screen { padding-top: 20px; justify-content: flex-start; }
+        .card-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+            width: 100%; max-width: 450px; padding-bottom: 50px;
+        }
+        .flip-card { background-color: transparent; width: 100%; aspect-ratio: 1 / 1; perspective: 1000px; cursor: pointer; }
+        .flip-card-inner {
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.6s; transform-style: preserve-3d;
+            border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .flip-card-front { background-color: #fff; }
+        .flip-card-front img { width: 100%; height: 100%; object-fit: cover; }
+        .flip-card-back { background-color: #00bcd4; color: white; transform: rotateY(180deg); padding: 5px; font-size: 0.75rem; font-weight: bold; }
+
+        /* --- SURPRISE 5: BALLOONS --- */
+        #balloon-screen { justify-content: center; overflow: hidden; position: relative; }
+        
+        .wish-list-container {
+            z-index: 80;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            min-width: 280px;
+            text-align: center;
+        }
+        .wish-item {
+            font-size: 1.1rem;
+            color: #333;
+            margin: 5px 0;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+            font-weight: bold;
+            border-bottom: 1px dashed #ccc;
+        }
+        .wish-item.revealed { opacity: 1; transform: translateY(0); }
+
+        .balloon-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50; 
+        }
+
+        .balloon {
+            position: absolute; bottom: -150px; 
+            width: 70px; height: 90px; 
+            background-color: #ff5722; 
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+            animation: floatUp linear forwards; 
+            cursor: pointer;
+            pointer-events: auto; 
+            z-index: 100; 
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem; opacity: 0.95;
+            transition: transform 0.1s;
+        }
+        .balloon:active { transform: scale(0.95); }
+
+        .balloon::before { 
+            content: ''; position: absolute; bottom: -20px; left: 50%; width: 2px; height: 20px;
+            background: #333; transform: translateX(-50%);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-130vh) rotate(20deg); }
+        }
+
+        .popped { animation: pop 0.2s forwards !important; pointer-events: none; }
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        /* --- SURPRISE 6: FINAL GIFT --- */
+        #gift-screen { justify-content: center; }
+        .gift-box {
+            font-size: 100px; cursor: pointer;
+            animation: shake 2s infinite; transition: transform 0.5s;
+        }
+        .gift-box:active { transform: scale(0.9); }
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .final-msg { opacity: 0; transform: scale(0); transition: all 1s; }
+        .show-final { opacity: 1; transform: scale(1); }
+
+    </style>
+</head>
+<body>
+
+    <button class="music-btn" onclick="toggleMusic()">🎵 Music</button>
+
+    <audio id="bg-music" loop>
+        <source src="song.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div id="chat-screen" class="screen">
+        <div class="chat-container">
+            <div id="msg1" class="message sent">Hey Bestie! 👋</div>
+            <div id="msg2" class="message sent">Happy Birthday to you! 🎂</div>
+            <div id="msg3" class="message sent">I made 6 Surprises for you! 😂</div>
+            <div id="msg4" class="message sent link-msg" onclick="goToWelcome()">👉 TAP HERE TO START 👈</div>
+        </div>
+    </div>
+
+    <div id="welcome-screen" class="screen pink-theme hidden">
+        <h4>Surprise #1</h4>
+        <h1>Happy Birthday Riya! (4")</h1>
+        <div class="hero-img"><img src="1 (1).jpeg" alt="Riya"></div> 
+        <p>You are officially older, slightly wiser, and definitely cooler.</p>
+        <button class="btn" onclick="goToLetter()">Next Surprise ✨</button>
+    </div>
+
+    <div id="letter-screen" class="screen pink-theme hidden">
+        <h4>Surprise #2</h4>
+        <h2>A Secret Note 📩</h2>
+        <p style="margin-bottom: 30px;">Tap the envelope to read</p>
+        <div class="envelope-wrapper" onclick="openLetter()">
+            <div class="envelope" id="envelope">
+                <div class="letter">
+                    <p><strong>To My Favorite Human,</strong></p>
+                    <p>Wishing you a year filled with laughter, success, and late-night snacks. Thank you for being such an amazing friend!</p>
+                    <p>Love always,</p>
+                    <p>❤️</p>
+                </div>
+            </div>
+        </div>
+        <button class="btn hidden" id="next-btn-1" onclick="goToCake()">Go for Cake 🎂</button>
+    </div>
+
+    <div id="cake-screen" class="screen pink-theme hidden">
+        <h4>Surprise #3</h4>
+        <h2>Cut The Cake! 🔪</h2>
+        <p>Drag the slider to serve a slice</p>
+        <div class="cake-stage">
+            <div class="cake-img"></div>
+            <div class="slice-img" id="slice"></div>
+            <div class="plate-img"></div>
+            <div class="cut-line" id="cut-line"></div>
+        </div>
+        <input type="range" min="0" max="100" value="0" class="cut-slider" id="cut-slider" oninput="cutCake(this.value)">
+        <h3 id="cut-text" style="opacity:0; color: #00bcd4; margin-top: 10px;">Served with Love! 🍰</h3>
+        <button class="btn hidden" id="next-btn-2" onclick="goToCards()">See Memories 📸</button>
+    </div>
+
+    <div id="card-screen" class="screen pink-theme hidden">
+        <h4>Surprise #4</h4>
+        <h2>9 Special Memories 🎈</h2>
+        <p style="margin-bottom: 10px; font-size: 0.9rem;">Tap photos to flip them!</p>
+        <div class="card-grid">
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (2).jpeg"></div><div class="flip-card-back"><p>Dreams 🚀</p></div></div></div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (10).jpeg"></div><div class="flip-card-back"><p>Smiles 😊</p></div></div></div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (5).jpeg"></div><div class="flip-card-back"><p>Vibes 🌿</p></div></div></div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (6).jpeg"></div><div class="flip-card-back"><p>Wealth 💰</p></div></div></div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (7).jpeg"></div><div class="flip-card-back"><p>Travel 🌍</p></div></div></div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (8).jpeg"></div><div class="flip-card-back"><p>Joy 😄</p></div></div></div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (9).jpeg"></div><div class="flip-card-back"><p>Success 🏆</p></div></div></div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (5).jpeg"></div><div class="flip-card-back"><p>Coolness 😎</p></div></div></div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front"><img src="1 (11).jpeg"></div><div class="flip-card-back"><p>Party! 🕺</p></div></div></div>
+        </div>
+        <button class="btn" onclick="goToBalloons()">Release Wishes 🎈</button>
+    </div>
+
+    <div id="balloon-screen" class="screen pink-theme hidden">
+        <h4>Surprise #5</h4>
+        <h2>Pop to Reveal Wishes!</h2>
+        <p>Catch 5 balloons to see your wishes 🍀</p>
+        
+        <div class="wish-list-container" id="wish-list"></div>
+
+        <div id="balloon-container" class="balloon-container"></div>
+
+        <button class="btn hidden" id="next-btn-3" onclick="goToGift()">Grand Finale 🎁</button>
+    </div>
+
+    <div id="gift-screen" class="screen pink-theme hidden">
+        <h4>Surprise #6</h4>
+        <h2>The Grand Finale</h2>
+        <p>Tap the mystery box!</p>
+        <div class="gift-box" id="gift-box" onclick="openGift()">🎁</div>
+        <div id="final-message" class="final-msg hidden">
+            <h1>BEST FRIENDS FOREVER!</h1>
+            <p>Hope you liked this little website!</p>
+            <p style="font-size: 3rem;">❤️🥳🎉</p>
+        </div>
+    </div>
+
+    <script>
+        // --- AUDIO ---
+        function toggleMusic() {
+            var audio = document.getElementById("bg-music");
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        }
+
+        // --- CHAT ANIMATION ---
+        window.onload = function() {
+            setTimeout(() => { showMsg('msg1'); }, 500);
+            setTimeout(() => { showMsg('msg2'); }, 1500);
+            setTimeout(() => { showMsg('msg3'); }, 3000);
+            setTimeout(() => { showMsg('msg4'); }, 4500);
+        }
+
+        function showMsg(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.style.opacity = 1;
+                el.style.transform = 'translateY(0)';
+            }
+        }
+
+        // --- NAVIGATION ---
+        function goToWelcome() {
+            var audio = document.getElementById("bg-music");
+            audio.volume = 0.5; 
+            audio.play().catch(e => console.log("Audio requires interaction"));
+            
+            document.getElementById('chat-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            fireConfetti();
+        }
+        function goToLetter() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('letter-screen').classList.remove('hidden');
+        }
+        function goToCake() {
+            document.getElementById('letter-screen').classList.add('hidden');
+            document.getElementById('cake-screen').classList.remove('hidden');
+        }
+        function goToCards() {
+            document.getElementById('cake-screen').classList.add('hidden');
+            document.getElementById('card-screen').classList.remove('hidden');
+            fireConfetti();
+        }
+        function goToBalloons() {
+            document.getElementById('card-screen').classList.add('hidden');
+            document.getElementById('balloon-screen').classList.remove('hidden');
+            createBalloons(); // Start balloons
+        }
+        function goToGift() {
+            document.getElementById('balloon-screen').classList.add('hidden');
+            document.getElementById('gift-screen').classList.remove('hidden');
+        }
+
+        // --- LETTER LOGIC ---
+        function openLetter() {
+            const envelope = document.getElementById('envelope');
+            envelope.classList.toggle('open');
+            setTimeout(() => { document.getElementById('next-btn-1').classList.remove('hidden'); }, 1000);
+        }
+
+        // --- CAKE LOGIC ---
+        function cutCake(val) {
+            const line = document.getElementById('cut-line');
+            let scaleY = val / 100;
+            line.style.transform = `scaleY(${scaleY})`;
+            if(val > 95) {
+                document.getElementById('slice').classList.add('served');
+                document.getElementById('cut-text').style.opacity = 1;
+                document.getElementById('next-btn-2').classList.remove('hidden');
+                setTimeout(() => { line.style.opacity = 0; }, 500);
+            }
+        }
+
+        // --- BALLOON LOGIC WITH WISHES ---
+        let poppedCount = 0;
+        const myWishes = [
+            "1. Endless Happiness! 😄",
+            "2. Good Health! ❤️",
+            "3. Lots of Money! 💰",
+            "4. True Love! 💑",
+            "5. Big Success! 🏆"
+        ];
+
+        function createBalloons() {
+            const container = document.getElementById('balloon-container');
+            const wishList = document.getElementById('wish-list');
+            const colors = ['#e91e63', '#9c27b0', '#2196f3', '#4caf50', '#ffeb3b', '#ff9800'];
+            
+            // Interval to spawn balloons
+            let balloonInterval = setInterval(() => {
+                if (poppedCount >= 5) {
+                    clearInterval(balloonInterval);
+                    return;
+                }
+                
+                const b = document.createElement('div');
+                b.className = 'balloon';
+                b.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                b.style.left = Math.random() * 80 + 10 + '%'; 
+                // Speed: 5 to 8 seconds (Slow)
+                b.style.animationDuration = (Math.random() * 3 + 5) + 's'; 
+                
+                b.onmousedown = function() { popBalloon(b); };
+                b.ontouchstart = function() { popBalloon(b); }; // Better for mobile
+
+                function popBalloon(balloonElement) {
+                    if(!balloonElement.classList.contains('popped') && poppedCount < 5) {
+                        balloonElement.classList.add('popped');
+                        fireConfetti();
+                        
+                        // REVEAL WISH
+                        const wishItem = document.createElement('div');
+                        wishItem.className = 'wish-item';
+                        wishItem.innerText = myWishes[poppedCount];
+                        wishList.appendChild(wishItem);
+                        
+                        setTimeout(() => wishItem.classList.add('revealed'), 100);
+
+                        poppedCount++;
+
+                        if(poppedCount === 5) { 
+                            document.getElementById('next-btn-3').classList.remove('hidden');
+                            // Clear balloons after 2 seconds
+                            setTimeout(() => { container.innerHTML = ''; }, 2000);
+                        }
+                    }
+                }
+
+                container.appendChild(b);
+                
+                // Cleanup balloons that float off screen
+                setTimeout(() => {
+                    if (container.contains(b)) container.removeChild(b);
+                }, 8000);
+
+            }, 1000); // New balloon every 1 second
+        }
+
+        // --- GIFT LOGIC ---
+        function openGift() {
+            document.getElementById('gift-box').style.display = 'none';
+            document.getElementById('final-message').classList.remove('hidden');
+            document.getElementById('final-message').classList.add('show-final');
+            
+            var duration = 3000;
+            var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                if (Date.now() < end) { requestAnimationFrame(frame); }
+            }());
+        }
+
+        function fireConfetti() {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+    </script>
+</body>
+</html>
